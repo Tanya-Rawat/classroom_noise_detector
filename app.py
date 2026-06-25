@@ -1,12 +1,12 @@
 import streamlit as st
-import sounddevice as sd
+from streamlit_mic_recorder import mic_recorder
 import numpy as np
-import pandas as pd
-from datetime import datetime
+import wave
+import io
 
-# -------------------------
-# PAGE TITLE
-# -------------------------
+# ---------------------------
+# PAGE CONFIG
+# ---------------------------
 
 st.set_page_config(
     page_title="Classroom Noise Detector",
@@ -18,74 +18,80 @@ st.title("🔊 Classroom Noise Detection System")
 st.subheader("A Python Project for Grades 8–10")
 
 st.markdown("""
-### Project Objective
-This project monitors classroom noise levels using a microphone.
+### Objective
 
-The system classifies the environment as:
+This project measures classroom noise levels using a microphone and classifies the environment as:
 
-- 😊 Quiet
-- 😐 Moderate
-- 🔊 Noisy
+- 🟢 Quiet
+- 🟡 Moderate
+- 🔴 Noisy
 
-Click the button below to measure the current noise level.
+Press **Start Recording**, record classroom sounds, then press **Stop Recording**.
 """)
 
-# -------------------------
-# NOISE DETECTION FUNCTION
-# -------------------------
+# ---------------------------
+# ANALYZE AUDIO
+# ---------------------------
 
-def get_noise_level():
+def get_volume(audio_bytes):
+    try:
+        wav_file = wave.open(io.BytesIO(audio_bytes), "rb")
 
-    duration = 5
-    sample_rate = 44100
+        frames = wav_file.readframes(wav_file.getnframes())
 
-    recording = sd.rec(
-        int(duration * sample_rate),
-        samplerate=sample_rate,
-        channels=1
-    )
+        audio_array = np.frombuffer(frames, dtype=np.int16)
 
-    sd.wait()
+        rms = np.sqrt(np.mean(audio_array.astype(np.float64) ** 2))
 
-    volume = np.linalg.norm(recording)
+        return rms
 
-    return volume
+    except Exception:
+        return 0
 
-# -------------------------
-# CLASSIFICATION FUNCTION
-# -------------------------
 
 def classify_noise(volume):
 
-    if volume < 10:
-        return "😊 QUIET"
+    if volume < 500:
+        return "🟢 QUIET"
 
-    elif volume < 30:
-        return "😐 MODERATE"
+    elif volume < 3000:
+        return "🟡 MODERATE"
 
     else:
-        return "🔊 NOISY"
+        return "🔴 NOISY"
 
-# -------------------------
-# BUTTON
-# -------------------------
 
-if st.button("Measure Classroom Noise"):
+# ---------------------------
+# MICROPHONE
+# ---------------------------
 
-    with st.spinner("Listening..."):
+st.subheader("🎤 Record Classroom Sound")
 
-        volume = get_noise_level()
+audio = mic_recorder(
+    start_prompt="▶️ Start Recording",
+    stop_prompt="⏹️ Stop Recording",
+    just_once=True,
+    use_container_width=True
+)
 
-        status = classify_noise(volume)
+# ---------------------------
+# RESULT
+# ---------------------------
 
-    st.success("Measurement Complete")
+if audio:
+
+    st.audio(audio["bytes"])
+
+    volume = get_volume(audio["bytes"])
+
+    status = classify_noise(volume)
+
+    st.subheader("📊 Analysis Result")
 
     st.metric(
-        label="Noise Level",
-        value=f"{volume:.2f}"
+        label="Measured Noise Level",
+        value=f"{volume:.0f}"
     )
-
-    st.subheader("Classroom Status")
 
     if "QUIET" in status:
         st.success(status)
@@ -96,51 +102,49 @@ if st.button("Measure Classroom Noise"):
     else:
         st.error(status)
 
-    # Save data
+    st.markdown("---")
 
-    data = pd.DataFrame({
-        "Time": [datetime.now()],
-        "Noise Level": [round(volume, 2)],
-        "Status": [status]
-    })
+    st.markdown("### How the Result Was Calculated")
 
-    st.subheader("Recorded Reading")
-    st.dataframe(data)
+    st.write(
+        "The recorded audio was analyzed and its average sound intensity "
+        "was calculated. Higher intensity means a noisier classroom."
+    )
 
-# -------------------------
-# HOW IT WORKS
-# -------------------------
+# ---------------------------
+# EDUCATIONAL SECTION
+# ---------------------------
+
+st.markdown("---")
+
+st.header("📚 Working Principle")
 
 st.markdown("""
----
-## How It Works
+### Input
+Microphone records classroom audio.
 
-### Step 1
-The microphone records sound from the classroom.
+### Processing
+Python calculates the sound intensity of the recording.
 
-### Step 2
-Python calculates the sound intensity.
+### Decision
+The sound level is compared against predefined thresholds.
 
-### Step 3
-The program compares the value with predefined limits.
-
-### Step 4
+### Output
 The classroom is classified as:
 
 - Quiet
 - Moderate
 - Noisy
-
-### Output
-The result is displayed on the screen.
 """)
 
-st.markdown("""
----
-### Developed Using
+st.markdown("---")
 
-- Python
-- Streamlit
-- NumPy
-- SoundDevice
+st.header("🚀 Future Improvements")
+
+st.markdown("""
+- Live noise monitoring
+- Daily noise reports
+- Graphs and statistics
+- Teacher alerts
+- AI-based sound classification
 """)
