@@ -1,23 +1,23 @@
-# 🔊 Classroom Noise Detection System
+# Classroom Noise Detection System
 
 A simple Python project that detects and measures classroom noise levels using a microphone. The system classifies the environment as **Quiet**, **Moderate**, or **Noisy** and displays the result through a Streamlit web application.
 
-## 📌 Objective
+## Objective
 
 To help students understand how sound data can be collected, processed, and analyzed using Python.
 
-## 🚀 Features
+## Features
 
 * Real-time noise measurement using a microphone
 * Noise level classification
 
-  * 😊 Quiet
-  * 😐 Moderate
-  * 🔊 Noisy
+  * Quiet
+  * Moderate
+  * Noisy
 * User-friendly Streamlit interface
 * Displays noise level and classroom status
 
-## 🛠 Technologies Used
+## Technologies Used
 
 * Python
 * Streamlit
@@ -25,7 +25,7 @@ To help students understand how sound data can be collected, processed, and anal
 * SoundDevice
 * Pandas
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 ClassroomNoiseDetector/
@@ -35,7 +35,7 @@ ClassroomNoiseDetector/
 └── README.md
 ```
 
-## ▶️ How to Run
+## How to Run
 
 1. Install the required libraries:
 
@@ -51,7 +51,7 @@ streamlit run app.py
 
 3. Open the link shown in the terminal to view the application in your browser.
 
-## ⚙️ How It Works
+## How It Works
 
 1. The microphone records sound from the classroom.
 2. Python calculates the sound intensity.
@@ -59,7 +59,7 @@ streamlit run app.py
 4. The classroom is classified as Quiet, Moderate, or Noisy.
 5. The result is displayed on the screen.
 
-## 👨‍🎓 Educational Value
+## Educational Value
 
 This project demonstrates the **Input → Process → Output** model and introduces students to:
 
