@@ -1,70 +1,123 @@
 # Classroom Noise Detection System
 
-A simple Python project that detects and measures classroom noise levels using a microphone. The system classifies the environment as **Quiet**, **Moderate**, or **Noisy** and displays the result through a Streamlit web application.
+A simple Streamlit application that records classroom audio using the browser microphone and classifies the classroom as **Quiet**, **Moderate**, or **Noisy** based on the recorded sound level.
 
-## Objective
-
-To help students understand how sound data can be collected, processed, and analyzed using Python.
-
-## Features
-
-* Real-time noise measurement using a microphone
-* Noise level classification
-
-  * Quiet
-  * Moderate
-  * Noisy
-* User-friendly Streamlit interface
-* Displays noise level and classroom status
-
-## Technologies Used
-
-* Python
-* Streamlit
-* NumPy
-* SoundDevice
-* Pandas
 
 ## Project Structure
 
-```text
-ClassroomNoiseDetector/
+```
+Classroom_Noise_Detector/
 │
 ├── app.py
 ├── requirements.txt
-└── README.md
+├── packages.txt
+├── README.md
 ```
 
-## How to Run
+---
 
-1. Install the required libraries:
+## Technologies Used
+
+- Python
+- Streamlit
+- streamlit-mic-recorder
+- PyDub
+- NumPy
+- FFmpeg
+
+---
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/yourusername/classroom-noise-detector.git
+
+cd classroom-noise-detector
+```
+
+### 2. Install Python packages
 
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Run the application:
+### 3. Install FFmpeg
+
+#### Ubuntu / Linux
+
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+#### macOS
+
+```bash
+brew install ffmpeg
+```
+
+#### Windows
+
+Download FFmpeg from:
+
+https://ffmpeg.org/download.html
+
+---
+
+## Run the Application
 
 ```bash
 streamlit run app.py
 ```
 
-3. Open the link shown in the terminal to view the application in your browser.
+The application will automatically open in your web browser.
+
+---
 
 ## How It Works
 
-1. The microphone records sound from the classroom.
-2. Python calculates the sound intensity.
-3. The sound level is compared with predefined thresholds.
-4. The classroom is classified as Quiet, Moderate, or Noisy.
-5. The result is displayed on the screen.
+1. Click **Start Recording**.
+2. Record classroom sounds for a few seconds.
+3. Click **Stop Recording**.
+4. The application analyzes the recorded audio.
+5. The average loudness is calculated.
+6. The classroom is classified as:
 
-## Educational Value
+- Quiet
+- Moderate
+- Noisy
 
-This project demonstrates the **Input → Process → Output** model and introduces students to:
+---
 
-* Audio sensing
-* Data processing
-* Python programming
-* Basic data analysis
-* Real-world problem solving
+## Noise Classification
+
+| Loudness (dBFS) | Classroom Status |
+|-----------------|------------------|
+| Less than -40 | Quiet |
+| -40 to -25 | Moderate |
+| Greater than -25 | Noisy |
+
+---
+
+## Requirements
+
+Python 3.9 or later
+
+Packages used:
+
+- streamlit
+- streamlit-mic-recorder
+- pydub
+- numpy
+
+System dependency:
+
+- FFmpeg
+
+---
+
+## License
+
+This project is created for educational purposes and may be freely used and modified for learning.
