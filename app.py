@@ -166,15 +166,3 @@ The classroom is classified as:
 - 🟡 Moderate
 - 🔴 Noisy
 """)
-
-st.markdown("---")
-
-st.header("🚀 Future Improvements")
-
-st.markdown("""
-- 📈 Live classroom noise monitoring
-- 🔔 Automatic teacher alerts
-- 📊 Daily and weekly noise reports
-- 🤖 AI-based sound classification
-- ☁️ Cloud database for storing records
-""")
