@@ -1,7 +1,6 @@
 import streamlit as st
 from streamlit_mic_recorder import mic_recorder
-import numpy as np
-import wave
+from pydub import AudioSegment
 import io
 
 # ---------------------------
@@ -20,41 +19,46 @@ st.subheader("A Python Project for Grades 8–10")
 st.markdown("""
 ### Objective
 
-This project measures classroom noise levels using a microphone and classifies the environment as:
+This project measures classroom noise levels using the microphone and classifies the classroom as:
 
 - 🟢 Quiet
 - 🟡 Moderate
 - 🔴 Noisy
 
-Press **Start Recording**, record classroom sounds, then press **Stop Recording**.
+Click **Start Recording**, record classroom sounds for a few seconds, and then click **Stop Recording**.
 """)
 
 # ---------------------------
-# ANALYZE AUDIO
+# AUDIO ANALYSIS
 # ---------------------------
 
 def get_volume(audio_bytes):
     try:
-        wav_file = wave.open(io.BytesIO(audio_bytes), "rb")
+        audio = AudioSegment.from_file(
+            io.BytesIO(audio_bytes),
+            format="webm"
+        )
 
-        frames = wav_file.readframes(wav_file.getnframes())
+        # Average loudness in dBFS
+        db = audio.dBFS
 
-        audio_array = np.frombuffer(frames, dtype=np.int16)
+        return db
 
-        rms = np.sqrt(np.mean(audio_array.astype(np.float64) ** 2))
-
-        return rms
-
-    except Exception:
-        return 0
+    except Exception as e:
+        st.error(f"Error reading audio: {e}")
+        return -90
 
 
-def classify_noise(volume):
+# ---------------------------
+# CLASSIFICATION
+# ---------------------------
 
-    if volume < 500:
+def classify_noise(db):
+
+    if db < -40:
         return "🟢 QUIET"
 
-    elif volume < 3000:
+    elif db < -25:
         return "🟡 MODERATE"
 
     else:
@@ -82,16 +86,30 @@ if audio:
 
     st.audio(audio["bytes"])
 
-    volume = get_volume(audio["bytes"])
+    db = get_volume(audio["bytes"])
 
-    status = classify_noise(volume)
+    # Convert dBFS to a 0–100 scale
+    meter = max(0, min(100, ((db + 60) / 60) * 100))
+
+    status = classify_noise(db)
 
     st.subheader("📊 Analysis Result")
 
-    st.metric(
-        label="Measured Noise Level",
-        value=f"{volume:.0f}"
-    )
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "Noise Level",
+            f"{meter:.1f}/100"
+        )
+
+    with col2:
+        st.metric(
+            "Average Loudness",
+            f"{db:.1f} dBFS"
+        )
+
+    st.progress(meter / 100)
 
     if "QUIET" in status:
         st.success(status)
@@ -102,14 +120,26 @@ if audio:
     else:
         st.error(status)
 
+    audio_clip = AudioSegment.from_file(
+        io.BytesIO(audio["bytes"]),
+        format="webm"
+    )
+
+    duration = len(audio_clip) / 1000
+
+    st.info(f"🎤 Recording Duration: {duration:.1f} seconds")
+
     st.markdown("---")
 
-    st.markdown("### How the Result Was Calculated")
+    st.markdown("### 📖 How the Result Was Calculated")
 
-    st.write(
-        "The recorded audio was analyzed and its average sound intensity "
-        "was calculated. Higher intensity means a noisier classroom."
-    )
+    st.write("""
+The microphone records classroom sound.
+
+The application measures the average loudness (dBFS) of the recording.
+
+Based on this value, the classroom is classified as Quiet, Moderate or Noisy.
+""")
 
 # ---------------------------
 # EDUCATIONAL SECTION
@@ -121,20 +151,20 @@ st.header("📚 Working Principle")
 
 st.markdown("""
 ### Input
-Microphone records classroom audio.
+The microphone records classroom sounds.
 
 ### Processing
-Python calculates the sound intensity of the recording.
+The recorded audio is analyzed to calculate its average loudness (dBFS).
 
 ### Decision
-The sound level is compared against predefined thresholds.
+The loudness is compared with predefined thresholds.
 
 ### Output
 The classroom is classified as:
 
-- Quiet
-- Moderate
-- Noisy
+- 🟢 Quiet
+- 🟡 Moderate
+- 🔴 Noisy
 """)
 
 st.markdown("---")
@@ -142,9 +172,9 @@ st.markdown("---")
 st.header("🚀 Future Improvements")
 
 st.markdown("""
-- Live noise monitoring
-- Daily noise reports
-- Graphs and statistics
-- Teacher alerts
-- AI-based sound classification
+- 📈 Live classroom noise monitoring
+- 🔔 Automatic teacher alerts
+- 📊 Daily and weekly noise reports
+- 🤖 AI-based sound classification
+- ☁️ Cloud database for storing records
 """)
